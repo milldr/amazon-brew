@@ -1,16 +1,12 @@
 # Docker Image with Homebrew and AWS CLI 
 
-Alpine with AWS CLI and Homebrew
+Linuxbrew with aws cli
 
 ## Build
 
 ```
-docker build -t milldr/amazon-brew .
+docker build -t milldr/amazon-brew:latest ./images/base
 ```
-
-Automated build on Docker Hub
-
-[![DockerHub Badge](http://dockeri.co/image/milldr/amazon-brew)](https://hub.docker.com/r/milldr/amazon-brew/)
 
 ## Usage
 
@@ -25,7 +21,6 @@ export AWS_DEFAULT_REGION="<region>"
 ## Maintenance
 
 - The Docker image build & publish is automated by CircleCI 
-- The awscli and s3cmd packages have handcoded versions in the Dockerfile that need to be bumped manually.
 
 ## References
 

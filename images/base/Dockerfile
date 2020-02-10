@@ -1,18 +1,9 @@
-FROM alpine:3.6
-
-
-# install homebrew
-RUN apt-get install build-essential curl file git
-    git clone https://github.com/Homebrew/brew ~/.linuxbrew/Homebrew && \
-    mkdir ~/.linuxbrew/bin && \
-    ln -s ~/.linuxbrew/Homebrew/bin/brew ~/.linuxbrew/bin && \
-    eval $(~/.linuxbrew/bin/brew shellenv)
+FROM linuxbrew/brew:latest
 
 # install aws-cli
-RUN apk -v --update add \
-        python \
-        py-pip \
-        && \
-    pip install --upgrade awscli==1.17.9 && \
-    apk -v --purge del py-pip && \
-    rm /var/cache/apk/*
+RUN sudo apt-get update && apt-get install -y \
+    python python3-pip && \
+    pip3 install --upgrade awscli==1.17.9
+
+# update brew 
+RUN brew update && brew doctor
