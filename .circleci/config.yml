@@ -36,43 +36,11 @@ jobs:
       - push:
           comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
 
-  build-base:
-    executor: docker-executor
-    steps:
-      - docker-build:
-          image_name: base
-          path: images/base
-  publish-latest-base:
-    executor: docker-executor
-    steps:
-      - push:
-          image_name: base
-          comma_separated_tags: "latest"
-  scan-base:
-    executor: clair-scanner/default
-    steps:
-      - clair-scan:
-          image_name: base
-  release-base:
-    executor: docker-executor
-    steps:
-      - checkout
-      - get-tag:
-          directory: images/base
-      - push:
-          comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
-
 workflows:
   version: 2.1
   build-images:
     jobs:
-      - build-base
-
-      - build-amazon-brew:
-          requires:
-            - publish-latest-base
-
-
+      - build-amazon-brew
       - scan-amazon-brew:
           requires:
             - build-amazon-brew
@@ -92,29 +60,6 @@ workflows:
       - release-amazon-brew:
           requires:
             - approve-release-amazon-brew
-          filters:
-            branches:
-              only: master
-
-      - scan-base:
-          requires:
-            - build-base
-      - publish-latest-base:
-          requires:
-            - scan-base
-          filters:
-            branches:
-              only: master
-      - approve-release-base:
-          type: approval
-          requires:
-            - scan-base
-          filters:
-            branches:
-              only: master
-      - release-base:
-          requires:
-            - approve-release-base
           filters:
             branches:
               only: master
