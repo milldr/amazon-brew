@@ -10,6 +10,32 @@ executors:
       - image: circleci/python:3
 jobs:
 
+  build-amazon-brew:
+    executor: docker-executor
+    steps:
+      - docker-build:
+          image_name: amazon-brew
+          path: images/amazon-brew
+  publish-latest-amazon-brew:
+    executor: docker-executor
+    steps:
+      - push:
+          image_name: amazon-brew
+          comma_separated_tags: "latest"
+  scan-amazon-brew:
+    executor: clair-scanner/default
+    steps:
+      - clair-scan:
+          image_name: amazon-brew
+  release-amazon-brew:
+    executor: docker-executor
+    steps:
+      - checkout
+      - get-tag:
+          directory: images/amazon-brew
+      - push:
+          comma_separated_tags: "$TAG,$CIRCLE_BRANCH"
+
   build-base:
     executor: docker-executor
     steps:
@@ -26,7 +52,7 @@ jobs:
     executor: clair-scanner/default
     steps:
       - clair-scan:
-          image_name: amazon-brew
+          image_name: base
   release-base:
     executor: docker-executor
     steps:
@@ -42,6 +68,33 @@ workflows:
     jobs:
       - build-base
 
+      - build-amazon-brew:
+          requires:
+            - publish-latest-base
+
+
+      - scan-amazon-brew:
+          requires:
+            - build-amazon-brew
+      - publish-latest-amazon-brew:
+          requires:
+            - scan-amazon-brew
+          filters:
+            branches:
+              only: master
+      - approve-release-amazon-brew:
+          type: approval
+          requires:
+            - scan-amazon-brew
+          filters:
+            branches:
+              only: master
+      - release-amazon-brew:
+          requires:
+            - approve-release-amazon-brew
+          filters:
+            branches:
+              only: master
 
       - scan-base:
           requires:
